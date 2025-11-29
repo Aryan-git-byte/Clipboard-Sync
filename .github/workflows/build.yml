@@ -1,41 +1,40 @@
-name: Android APK Build
+name: Build Kivy Android APK
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-
-    - name: Install Android SDK components
+    - name: Install dependencies
       run: |
-        sdkmanager "platforms;android-34"
-        sdkmanager "build-tools;34.0.0"
+        sudo apt update
+        sudo apt install -y python3-pip python3-setuptools git zip wget unzip
 
-    - name: Build Debug APK
-      working-directory: ClipSync
+    - name: Install Buildozer
       run: |
-        chmod +x gradlew
-        ./gradlew assembleDebug --stacktrace
+        pip3 install buildozer cython
 
-    - name: Upload APK artifact
+    - name: Install Android SDK / NDK
+      run: |
+        sudo apt install -y openjdk-17-jdk
+        sudo apt install -y android-sdk
+        yes | sdkmanager --licenses || true
+        yes | sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+    - name: Build APK
+      run: |
+        buildozer android debug
+
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug
-        path: ClipSync/app/build/outputs/apk/debug/app-debug.apk
+        name: clipsync-apk
+        path: bin/*.apk
