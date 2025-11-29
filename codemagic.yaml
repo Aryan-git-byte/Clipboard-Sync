@@ -1,0 +1,26 @@
+workflows:
+  android_build:
+    name: Native Android APK
+
+    environment:
+      vars:
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+
+    scripts:
+      - name: Show Java version
+        script: |
+          java -version
+
+      - name: Install Android SDK platform and tools
+        script: |
+          yes | sdkmanager "platforms;android-34"
+          yes | sdkmanager "build-tools;34.0.0"
+
+      - name: Build APK with Gradle
+        script: |
+          cd ClipSync
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+    artifacts:
+      - ClipSync/app/build/outputs/apk/debug/app-debug.apk
