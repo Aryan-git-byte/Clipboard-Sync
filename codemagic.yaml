@@ -2,6 +2,8 @@ workflows:
   android_build:
     name: Native Android APK
 
+    instance_type: linux_x2
+
     scripts:
       - name: Show Java version
         script: |
